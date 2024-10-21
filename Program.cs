@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System;
 
 namespace Console_Blank_6
 {
@@ -7,11 +7,20 @@ namespace Console_Blank_6
         static void Main(string[] args)
         {
             Bank bank;
+			string answer;
             Console.WriteLine("Enter the number of accounts to be added:");
             try
             {
                 bank = new Bank(Convert.ToInt32(Console.ReadLine()));
                 bank.AddAllAccount();
+				Console.WriteLine("Bank has been created. Functions are as follows:/nA to add account/nE to edit an account/nD to delete an account");
+				while(true)
+				{
+					if (answer == "A")
+					{
+						bank.AddAccounts();
+					}
+				}
             }
             catch (Exception e)
             {
@@ -24,6 +33,7 @@ namespace Console_Blank_6
     {
         private BankAccount[] bank;
         private string sortCode;
+		private string answer;
         public Bank(int maxAccounts)
         {
             bank = new BankAccount[maxAccounts];
@@ -32,7 +42,34 @@ namespace Console_Blank_6
         {
             for (int i = 0; i < bank.Length; i++)
             {
-                bank[i] = new BankAccount(i);
+                bank[i] = new BankAccount();
+				Console.WriteLine("Enter a new forename: ");
+				answer = Console.ReadLine();
+				bank[i].SetForename(answer);
+				Console.WriteLine("Enter a new surname: ");
+				answer = Console.ReadLine();
+				bank[i].SetSurname(answer);
+				Console.WriteLine("Set a new balance");
+				try
+				{
+					double answer = Convert.ToDouble(Console.ReadLine());
+					if (answer >= 0)
+					{
+						bank[i].SetBalance(answer);
+					}
+					else
+					{
+						Console.WriteLine("Balance of account {0} set to 0", i);
+					}
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine(e.Message);
+					Console.WriteLine("Balance of account {0} set to 0", i + 1);
+				}
+				Console.WriteLine("Enter the new sort code");
+				sortCode = Console.ReadLine();
+				Console.WriteLine("New sort code is: {0}", sortCode);
             }
             return true;
         }
@@ -40,6 +77,13 @@ namespace Console_Blank_6
         {
             return false;
         }
+		public bool FindAccount(int acountNo)
+		{
+			for (int i = 0; i < bank.Length; i++)
+			{
+				if (i = accountNo)
+				{
+					
         public bool ReturnAccountDetails(int accountNo)
         {
             accountNo--;
@@ -54,15 +98,21 @@ namespace Console_Blank_6
         private string foreName;
         private string surName;
         private double balance = -1;
-        private string sortCode;
-        private string[] address;
+		private string accountSort;
+        private string[] address = new string[4];
         private int accountNum;
-
+		public BankAccount()
+		{
+			foreName = "John";
+			surName = "Smith";
+			balance = 0;
+			
+			address = ["ab", "bc", "cd", "DE"];
+		}
         public BankAccount(int accountNumber)
         {
             SetName();
             SetNewBalance();
-            SetSortCode();
             SetAccountNum(accountNumber);
             SetAddress();
         }
@@ -97,7 +147,7 @@ namespace Console_Blank_6
         public void OutputDetails()
         {
             Console.WriteLine("Name: {0} {1} ", foreName, surName);
-            Console.WriteLine("Sort Code: {0} ", sortCode);
+            Console.WriteLine("Sort Code: {0} ", accountSort);
             Console.WriteLine("Address: {0}, {1}, {2}, {3} ", address[0], address[1], address[2], address[3]);
             Console.WriteLine("Account number: {0} ", accountNum);
         }
@@ -109,6 +159,16 @@ namespace Console_Blank_6
             surName = Console.ReadLine();
             return true;
         }
+		public bool SetForename(string newForename)
+		{
+			foreName = newForename;
+			return true;
+		}
+		public bool SetSurname(string newSurname)
+		{
+			surName = newSurname;
+			return true;
+		}
         public bool SetNewBalance()
         {
             while (balance <= 0)
@@ -134,19 +194,11 @@ namespace Console_Blank_6
             Console.WriteLine("New balance could not be set");
             return false;
         }
-        public bool SetSortCode()
-        {
-            Console.WriteLine("Enter new sort code:");
-            try
-            {
-                sortCode = (Console.ReadLine());
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+		public bool SetBalance(double newBalance)
+		{
+			balance = newBalance;
+			return true;
+		}
         public bool SetAddress()
         {
             Console.WriteLine("Enter new address in the following format, incl. commas: House Street, Town, City (repeat Town where appropriate), Postcode");
