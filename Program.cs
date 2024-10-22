@@ -11,33 +11,39 @@ namespace Console_Blank_6
 			string answer;
 			int intAnswer;
 			double doubleAnswer;
+			//start of actual code
             Console.WriteLine("Enter the number of accounts to be added:");
+			//creates new bank (BankAccounts[]) of length input
 			bank = new Bank(Convert.ToInt32(Console.ReadLine()));
 			bank.AddAllAccount();
 			Console.WriteLine("Bank has been created.");
 			while(true)
 			{
-				Console.WriteLine("Functions are as follows:\nA to add account\nE to edit an account\nD to delete an account\nR to return details");
+				//main menu
+				Console.WriteLine("\nFunctions are as follows:\nA to add account\nE to edit an account\nD to delete an account\nR to return details");
 				answer = Console.ReadLine().ToLower();
+				//add account
 				if (answer == "a")
 				{
 					bank.AddAccounts();
 				}
+				//edit existing account
 				else if (answer == "e")
 				{
 					try
 					{
-						intAnswer = Convert.ToInt32(Console.ReadLine().ToLower());
+						Console.WriteLine("\nEnter the account number you wish to edit:");
+						intAnswer = Convert.ToInt32(Console.ReadLine().ToLower()) - 1;
 					}
 					catch (Exception e)
 					{
 						Console.WriteLine(e.Message);
-						intAnswer = - 1;
+						intAnswer = -1;
 					}
 					account = bank.FindAccount(intAnswer);
 					if (account != null)
 					{
-						Console.WriteLine("What do you want to edit? (for, sur, bal, adr)");
+						Console.WriteLine("\nWhat do you want to edit? (for, sur, bal, adr)");
 						answer = Console.ReadLine().ToLower();
 						if (answer == "for" || answer == "f")
 						{
@@ -69,41 +75,46 @@ namespace Console_Blank_6
 							account.SetAddress();
 						}
 					}
-					else if (answer == "d")
+				}
+				//delete existing account
+				else if (answer == "d")
+				{
+					try
 					{
-						try
-						{
-							intAnswer = Convert.ToInt32(Console.ReadLine().ToLower());
-						}
-						catch (Exception e)
-						{
-							Console.WriteLine(e.Message);
-							intAnswer = - 1;
-						}
-						account = bank.FindAccount(intAnswer);
-						if (account != null)
-						{
-							account = null;
-						}
+						Console.WriteLine("\nEnter the account number you wish to delete:");
+						intAnswer = Convert.ToInt32(Console.ReadLine().ToLower());
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e.Message);
+						intAnswer = -1;
+					}
+					account = bank.FindAccount(intAnswer);
+					if (account != null)
+					{
+						account = null;
 					}
 				}
 			}
         }
     }
 
+	//object Bank
     public class Bank
     {
         private BankAccount[] bank;
-        private string sortCode;
 		private string answer;
+		//private string sortCode;
 		private int accountCount;
         public Bank(int maxAccounts)
         {
+            //basic Bank constructor
             bank = new BankAccount[maxAccounts];
 			accountCount = maxAccounts;
         }
         public bool AddAllAccount()
         {
+			//initial adding of accounts
             for (int i = 0; i < bank.Length; i++)
             {
                 bank[i] = new BankAccount();
@@ -123,23 +134,24 @@ namespace Console_Blank_6
 					}
 					else
 					{
-						Console.WriteLine("Balance of account {0} set to 0", i);
+						Console.WriteLine("Input out of range; Balance of account {0} set to 0", i);
 					}
 				}
 				catch (Exception e)
 				{
 					Console.WriteLine(e.Message);
-					Console.WriteLine("Balance of account {0} set to 0", i + 1);
+					Console.WriteLine("Input out of range; Balance of account {0} set to 0", i);
 				}
-				Console.WriteLine("Enter the new sort code");
-				sortCode = Console.ReadLine();
-				Console.WriteLine("New sort code is: {0}", sortCode);
+				//Console.WriteLine("Enter the new sort code");
+				//sortCode = Console.ReadLine();
+				//Console.WriteLine("New sort code is: {0}", sortCode);
 				Console.WriteLine("Account number is: {0}", i + 1);
             }
             return true;
         }
         public bool AddAccounts()
         {
+			//add a new account
 			Array.Resize(ref bank, bank.Length + 1);
 			bank[bank.Length - 1] = new BankAccount();
 			Console.WriteLine("Enter a new forename: ");
@@ -164,15 +176,17 @@ namespace Console_Blank_6
 			catch (Exception e)
 			{
 				Console.WriteLine(e.Message);
-				Console.WriteLine("Balance of account {0} set to 0", bank.Length + 1);
+				Console.WriteLine("Balance of account {0} set to 0", bank.Length);
 			}
-			Console.WriteLine("Enter the new sort code");
-			sortCode = Console.ReadLine();
-			Console.WriteLine("New sort code is: {0}", sortCode);
+            //Console.WriteLine("Enter the new sort code");
+            //sortCode = Console.ReadLine();
+            //Console.WriteLine("New sort code is: {0}", sortCode);
+            Console.WriteLine("Account number is: {0}", bank.Length);
             return true;
         }
 		public BankAccount FindAccount(int accountNo)
 		{
+			//finds an account (for editing or deleting)
 			for (int i = 0; i < bank.Length; i++)
 			{
 				if (i == accountNo)
@@ -184,6 +198,7 @@ namespace Console_Blank_6
 		}
         public bool ReturnAccountDetails(int accountNo)
         {
+			//what it says on the tin
             accountNo--;
             bank[accountNo].OutputDetails();
             bank[accountNo].OutputBalance();
@@ -197,15 +212,13 @@ namespace Console_Blank_6
         private string surName;
         private double balance = -1;
 		private string accountSort;
-        private string[] address = new string[4];
+        private string[] address = { "ab", "bc", "cd", "DE" };
         private int accountNum;
 		public BankAccount()
 		{
 			foreName = "John";
 			surName = "Smith";
 			balance = 0;
-			
-			address = ["ab", "bc", "cd", "DE"];
 		}
         public BankAccount(int accountNumber)
         {
@@ -216,31 +229,37 @@ namespace Console_Blank_6
         }
         public bool Deposit(double amount)
         {
+			//when money is added to an account
             try
             {
                 balance = balance + amount;
+				Console.WriteLine("\n||DEPOSIT REQUEST APPROVED||\n");
                 return true;
             }
             catch
             {
+				Console.WriteLine("\n||DEPOSIT REQUEST DENIED||\n");
                 return false;
             }
         }
         public bool Withdraw(double amount)
         {
+			//opposite of the above (except when you attempt to withdraw more than is available, then rejects)
             if (amount < balance)
             {
                 balance = balance - amount;
+				Console.WriteLine("\n||WITHDRAWAL REQUEST APPROVED||\n");
                 return true;
             }
             else
             {
+				Console.WriteLine("\n||WITHDRAWAL REQUEST DENIED||\n");
                 return false;
             }
         }
         public void OutputBalance()
         {
-            Console.WriteLine(balance);
+            Console.WriteLine("Balance: {0} ", balance);
         }
         public void OutputDetails()
         {
