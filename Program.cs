@@ -84,6 +84,7 @@ namespace Console_Blank_6
 				}
 				else if (answer == "r")
 				{
+					//return the details of an account
 					Console.WriteLine("\nEnter the account number to return details: ");
 					try
 					{
@@ -97,6 +98,7 @@ namespace Console_Blank_6
 				}
 				else if (answer == "w")
 				{
+					//withdraw money from the account
 					Console.WriteLine("Enter the account number to withdraw from:");
 					try
 					{
@@ -122,6 +124,7 @@ namespace Console_Blank_6
 				}
 				else if (answer == "p")
 				{
+					//Deposit money to the account
 					Console.WriteLine("Enter the account number to deposit to:");
 					try
 					{
@@ -234,32 +237,33 @@ namespace Console_Blank_6
             Console.WriteLine("Account number is: {0}", bank.Length);
             return true;
         }
-		public BankAccount FindAccount(int accountNo)
+	public BankAccount FindAccount(int accountNo)
+	{
+		//finds an account (for editing or deleting)
+		for (int i = 0; i < bank.Length; i++)
 		{
-			//finds an account (for editing or deleting)
-			for (int i = 0; i < bank.Length; i++)
+			if (i == accountNo - 1)
 			{
-				if (i == accountNo - 1)
-				{
-					return bank[i];
-				}
+				return bank[i];
 			}
-			return null;
 		}
+		return null;
+	}
         public bool ReturnAccountDetails(int accountNo)
-        {
-			//what it says on the tin
-            accountNo--;
-            bank[accountNo].OutputDetails();
-            bank[accountNo].OutputBalance();
-            return true;
+	{
+		//returns everything
+	        accountNo--;
+	        bank[accountNo].OutputDetails();
+	        bank[accountNo].OutputBalance();
+	        return true;
         }
-		public bool ReturnBalance(int accountNo)
-		{
-			accountNo--;
-			bank[accountNo].OutputBalance();
-			return true;
-		}
+	public bool ReturnBalance(int accountNo)
+	{
+		//returns just the balance
+		accountNo--;
+		bank[accountNo].OutputBalance();
+		return true;
+	}
     }
 
     public class BankAccount
@@ -267,17 +271,19 @@ namespace Console_Blank_6
         private string foreName;
         private string surName;
         private double balance = -1;
-		private string accountSort;
+	private string accountSort;
         private string[] address = { "ab", "bc", "cd", "DE" };
         private int accountNum;
-		public BankAccount()
-		{
-			foreName = "John";
-			surName = "Smith";
-			balance = 0;
-		}
+	public BankAccount()
+	{
+		//basic constructor
+		foreName = "John";
+		surName = "Smith";
+		balance = 0;
+	}
         public BankAccount(int accountNumber)
         {
+		//constructor used when adding accounts
             SetName();
             SetNewBalance();
             SetAccountNum(accountNumber);
@@ -315,67 +321,72 @@ namespace Console_Blank_6
         }
         public void OutputBalance()
         {
-            Console.WriteLine("Balance: {0} ", balance);
+		//writes the balance
+		Console.WriteLine("Balance: {0} ", balance);
         }
         public void OutputDetails()
         {
-            Console.WriteLine("\nName: {0} {1} ", foreName, surName);
-            Console.WriteLine("Sort Code: {0} ", accountSort);
-            Console.WriteLine("Address: {0}, {1}, {2}, {3} ", address[0], address[1], address[2], address[3]);
-            Console.WriteLine("Account number: {0} ", accountNum);
+		//writes all details to the screen
+		Console.WriteLine("\nName: {0} {1} ", foreName, surName);
+		Console.WriteLine("Sort Code: {0} ", accountSort);
+		Console.WriteLine("Address: {0}, {1}, {2}, {3} ", address[0], address[1], address[2], address[3]);
+		Console.WriteLine("Account number: {0} ", accountNum);
         }
         public bool SetName()
         {
-            Console.WriteLine("Enter forename:");
-            foreName = Console.ReadLine();
-            Console.WriteLine("Enter surname:");
-            surName = Console.ReadLine();
-            return true;
+		//sets the name of the person using this account
+            	Console.WriteLine("Enter forename:");
+            	foreName = Console.ReadLine();
+            	Console.WriteLine("Enter surname:");
+            	surName = Console.ReadLine();
+            	return true;
         }
-		public bool SetForename(string newForename)
-		{
-			foreName = newForename;
-			return true;
-		}
-		public bool SetSurname(string newSurname)
-		{
-			surName = newSurname;
-			return true;
-		}
-		public string GetSurname()
-		{
-			return surName;
-		}
+	public bool SetForename(string newForename)
+	{
+		foreName = newForename;
+		return true;
+	}
+	public bool SetSurname(string newSurname)
+	{
+		surName = newSurname;
+		return true;
+	}
+	public string GetSurname()
+	{
+		return surName;
+	}
         public bool SetNewBalance()
         {
-            while (balance <= 0)
-            {
-                Console.WriteLine("Enter new balance:");
-                try
-                {
-                    balance = Convert.ToDouble(Console.ReadLine());
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-                if (balance > 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine("Balance cannot be less than or equal to 0");
-                }
-            }
+		//sets the intial value of the balance of the account
+            	while (balance <= 0)
+            	{
+                	Console.WriteLine("Enter new balance:");
+                	try
+                	{
+                    		balance = Convert.ToDouble(Console.ReadLine());
+                	}
+	                catch (Exception e)
+	                {
+	                    Console.WriteLine(e.Message);
+	                }
+	                if (balance > 0)
+	                {
+	                    return true;
+	                }
+	                else
+	                {
+	                    Console.WriteLine("Balance cannot be less than or equal to 0");
+	                }
+            	}
             Console.WriteLine("New balance could not be set");
             return false;
         }
-		public bool SetBalance(double newBalance)
-		{
-			balance = newBalance;
-			return true;
-		}
+	public bool SetBalance(double newBalance)
+	{
+		//sets the balance when editing an existing account
+		balance = newBalance;
+		return true;
+	}
         public bool SetAddress()
         {
             Console.WriteLine("Enter new address in the following format, incl. commas: House Street, Town, City (repeat Town where appropriate), Postcode");
