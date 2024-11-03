@@ -1,4 +1,6 @@
+//This version uses a text menu; this is not to be used for the final GUI
 using System;
+using System.Security.Cryptography;
 
 namespace Console_Blank_6
 {
@@ -10,6 +12,7 @@ namespace Console_Blank_6
 			BankAccount account;
 			string answer;
 			int intAnswer;
+			int intAnswer2;
 			double toWithdraw_Deposit;
 			//start of actual code
             Console.WriteLine("Enter the number of accounts to be added:");
@@ -62,7 +65,11 @@ namespace Console_Blank_6
 							account.SetAddress();
 						}
 					}
-				}
+                    else
+                    {
+                        Console.WriteLine("Account not found: It may have been moved or deleted");
+                    }
+                }
 				//delete existing account
 				else if (answer == "d")
 				{
@@ -77,11 +84,17 @@ namespace Console_Blank_6
 						intAnswer = -1;
 					}
 					account = bank.FindAccount(intAnswer);
-					if (account != null)
+                    Console.WriteLine("Confirm your identity by entering your Sort Code: ");
+                    intAnswer2 = Convert.ToInt32(Console.ReadLine());
+                    if (account != null && account.GetSortCode() == intAnswer2)
 					{
-						account = null;
+						bank.DeleteAccount(intAnswer);
 					}
-				}
+                    else
+                    {
+                        Console.WriteLine("Account not found: It may have been moved or deleted, or you may have typed an incorrect Sort Code");
+                    }
+                }
 				else if (answer == "r")
 				{
 					//return the details of an account
@@ -89,8 +102,24 @@ namespace Console_Blank_6
 					try
 					{
 						intAnswer = Convert.ToInt32(Console.ReadLine());
-						bank.ReturnAccountDetails(intAnswer);
-					}
+						account = bank.FindAccount(intAnswer);
+                        Console.WriteLine("Confirm your identity by entering your Sort Code: ");
+                        intAnswer = Convert.ToInt32(Console.ReadLine());
+                        if (account.GetSortCode() == intAnswer)
+                        {
+                            Console.WriteLine("Confirm your identity by entering your surname:");
+                            answer = Console.ReadLine();
+                            if (answer == account.GetSurname())
+                            {
+								account.OutputDetails();
+								account.OutputBalance();
+                            }
+                        }
+                        else
+                        {
+							Console.WriteLine("Account not found: It may have been moved or deleted");
+                        }
+                    }
 					catch (Exception e)
 					{
 						Console.WriteLine(e.Message);
@@ -103,20 +132,30 @@ namespace Console_Blank_6
 					try
 					{
 						intAnswer = Convert.ToInt32(Console.ReadLine());
-						if (bank.FindAccount(intAnswer) != null)
+						account = bank.FindAccount(intAnswer);
+						if (account != null)
 						{
 							Console.WriteLine("\n||ACCOUNT FOUND||\n");
-							Console.WriteLine("Confirm your identity by entering your surname:");
-							answer = Console.ReadLine();
-							if (answer == bank.FindAccount(intAnswer).GetSurname())
+                            Console.WriteLine("Confirm your identity by entering your Sort Code: ");
+                            intAnswer = Convert.ToInt32(Console.ReadLine());
+							if (account.GetSortCode() == intAnswer)
 							{
-								Console.WriteLine("Enter the amount to be withdrawn:");
-								toWithdraw_Deposit = Convert.ToDouble(Console.ReadLine());
-								bank.FindAccount(intAnswer).Withdraw(toWithdraw_Deposit);
+								Console.WriteLine("Confirm your identity by entering your surname:");
+								answer = Console.ReadLine();
+								if (answer == account.GetSurname())
+								{
+									Console.WriteLine("Enter the amount to be withdrawn:");
+									toWithdraw_Deposit = Convert.ToDouble(Console.ReadLine());
+									account.Withdraw(toWithdraw_Deposit);
+								}
+								bank.ReturnBalance(intAnswer);
 							}
-							bank.ReturnBalance(intAnswer);
 						}
-					}
+                        else
+                        {
+							Console.WriteLine("Account not found: It may have been moved or deleted");
+                        }
+                    }
 					catch (Exception e)
 					{
 						Console.WriteLine(e.Message);
@@ -129,18 +168,28 @@ namespace Console_Blank_6
 					try
 					{
 						intAnswer = Convert.ToInt32(Console.ReadLine());
-						if (bank.FindAccount(intAnswer) != null)
+						account = bank.FindAccount(intAnswer);
+						if (account != null)
 						{
 							Console.WriteLine("\n||ACCOUNT FOUND||\n");
-							Console.WriteLine("Confirm your identity by entering your surname:");
-							answer = Console.ReadLine();
-							if (answer == bank.FindAccount(intAnswer).GetSurname())
-							{
-								Console.WriteLine("Enter the amount to deposit:");
-								toWithdraw_Deposit = Convert.ToDouble(Console.ReadLine());
-								bank.FindAccount(intAnswer).Deposit(toWithdraw_Deposit);
-							}
-							bank.ReturnBalance(intAnswer);
+                            Console.WriteLine("Confirm your identity by entering your Sort Code: ");
+                            intAnswer = Convert.ToInt32(Console.ReadLine());
+                            if (account.GetSortCode() == intAnswer)
+                            {
+                                Console.WriteLine("Confirm your identity by entering your surname:");
+                                answer = Console.ReadLine();
+                                if (answer == account.GetSurname())
+                                {
+                                    Console.WriteLine("Enter the amount to be deposited:");
+                                    toWithdraw_Deposit = Convert.ToDouble(Console.ReadLine());
+                                    account.Deposit(toWithdraw_Deposit);
+                                }
+                                bank.ReturnBalance(intAnswer);
+                            }
+                        }
+						else
+						{
+							Console.WriteLine("Account not found: It may have been moved or deleted");
 						}
 					}
 					catch (Exception e)
@@ -157,8 +206,8 @@ namespace Console_Blank_6
     {
         private BankAccount[] bank;
 		private string answer;
-		//private string sortCode;
 		private int accountCount;
+		private int accountPos;
         public Bank(int maxAccounts)
         {
             //basic Bank constructor
@@ -195,9 +244,20 @@ namespace Console_Blank_6
 					Console.WriteLine(e.Message);
 					Console.WriteLine("Input out of range; Balance of account {0} set to 0", i);
 				}
-				//Console.WriteLine("Enter the new sort code");
-				//sortCode = Console.ReadLine();
-				//Console.WriteLine("New sort code is: {0}", sortCode);
+				bank[i].SetAddress();
+				bank[i].SetSortCode();
+				if (i > 1)
+				{
+					for (int j = 1; j < i; j++)
+					{
+						if (bank[i].GetSortCode() == bank[j].GetSortCode())
+						{
+							bank[i].SetSortCode();
+							j = 0;
+						}
+					}
+				}
+				Console.WriteLine("New sort code is: {0}", bank[i].GetSortCode());
 				Console.WriteLine("Account number is: {0}", i + 1);
             }
             return true;
@@ -205,21 +265,23 @@ namespace Console_Blank_6
         public bool AddAccounts()
         {
 			//add a new account
+			
 			Array.Resize(ref bank, bank.Length + 1);
 			bank[bank.Length - 1] = new BankAccount();
+			accountPos = bank.Length - 1;
 			Console.WriteLine("Enter a new forename: ");
 			answer = Console.ReadLine();
-			bank[bank.Length - 1].SetForename(answer);
+			bank[accountPos].SetForename(answer);
 			Console.WriteLine("Enter a new surname: ");
 			answer = Console.ReadLine();
-			bank[bank.Length - 1].SetSurname(answer);
+			bank[accountPos].SetSurname(answer);
 			Console.WriteLine("Set a new balance");
 			try
 			{
 				double answer = Convert.ToDouble(Console.ReadLine());
 				if (answer >= 0)
 				{
-					bank[accountCount].SetBalance(answer);
+					bank[accountPos].SetBalance(answer);
 				}
 				else
 				{
@@ -231,63 +293,75 @@ namespace Console_Blank_6
 				Console.WriteLine(e.Message);
 				Console.WriteLine("Balance of account {0} set to 0", bank.Length);
 			}
-            //Console.WriteLine("Enter the new sort code");
-            //sortCode = Console.ReadLine();
-            //Console.WriteLine("New sort code is: {0}", sortCode);
+			bank[accountPos].SetAddress();
+            bank[accountPos].SetSortCode();
+            if (bank.Length > 1)
+            {
+                for (int j = 1; j < bank.Length; j++)
+                {
+                    if (bank[accountPos].GetSortCode() == bank[j].GetSortCode() && accountPos != j)
+                    {
+                        bank[accountPos].SetSortCode();
+                        j = 0;
+                    }
+                }
+            }
+            Console.WriteLine("New sort code is: {0}", bank[accountPos].GetSortCode());
             Console.WriteLine("Account number is: {0}", bank.Length);
             return true;
         }
-	public BankAccount FindAccount(int accountNo)
-	{
-		//finds an account (for editing or deleting)
-		for (int i = 0; i < bank.Length; i++)
+		public BankAccount FindAccount(int accountNo)
 		{
-			if (i == accountNo - 1)
+			//finds an account (for editing or deleting)
+			for (int i = 0; i < bank.Length; i++)
 			{
-				return bank[i];
+				if (i == accountNo - 1)
+				{
+					return bank[i];
+				}
 			}
+			return null;
 		}
-		return null;
-	}
-        public bool ReturnAccountDetails(int accountNo)
-	{
-		//returns everything
-	        accountNo--;
-	        bank[accountNo].OutputDetails();
-	        bank[accountNo].OutputBalance();
-	        return true;
-        }
-	public bool ReturnBalance(int accountNo)
-	{
-		//returns just the balance
-		accountNo--;
-		bank[accountNo].OutputBalance();
-		return true;
-	}
+		public bool ReturnBalance(int accountNo)
+		{
+			//returns just the balance
+			accountNo--;
+			bank[accountNo].OutputBalance();
+			return true;
+		}
+		public bool DeleteAccount(int accountNumber)
+		{
+			bank[accountNumber] = null;
+			return true;
+		}
     }
 
     public class BankAccount
-    {
+	{
         private string foreName;
         private string surName;
         private double balance = -1;
-	private string accountSort;
+		private string accountSort;
         private string[] address = { "ab", "bc", "cd", "DE" };
         private int accountNum;
-	public BankAccount()
-	{
-		//basic constructor
-		foreName = "John";
-		surName = "Smith";
-		balance = 0;
-	}
+		private int SortCode;
+        private Random random = new Random();
+
+        public BankAccount()
+		{
+			//basic constructor
+			foreName = "John";
+			surName = "Smith";
+			balance = 0;
+		}
         public BankAccount(int accountNumber)
         {
-		//constructor used when adding accounts
+			//constructor used when adding accounts
             SetName();
             SetNewBalance();
             SetAccountNum(accountNumber);
             SetAddress();
+			SetSortCode();
         }
         public bool Deposit(double amount)
         {
@@ -321,78 +395,81 @@ namespace Console_Blank_6
         }
         public void OutputBalance()
         {
-		//writes the balance
-		Console.WriteLine("Balance: {0} ", balance);
+			//writes the balance
+			Console.WriteLine("Balance: {0} ", balance);
         }
         public void OutputDetails()
         {
-		//writes all details to the screen
-		Console.WriteLine("\nName: {0} {1} ", foreName, surName);
-		Console.WriteLine("Sort Code: {0} ", accountSort);
-		Console.WriteLine("Address: {0}, {1}, {2}, {3} ", address[0], address[1], address[2], address[3]);
-		Console.WriteLine("Account number: {0} ", accountNum);
-        }
-        public bool SetName()
+			//writes all details to the screen
+			Console.WriteLine("\nName: {0} {1} ", foreName, surName);
+			Console.WriteLine("Address: {0}, {1}, {2}, {3}, {4} ", address[0], address[1], address[2], address[3], address[4]);
+            Console.WriteLine("Sort Code: {0} ", SortCode);
+            Console.WriteLine("Account number: {0} ", accountNum + 1);
+		}
+		public bool SetName()
         {
-		//sets the name of the person using this account
-            	Console.WriteLine("Enter forename:");
-            	foreName = Console.ReadLine();
-            	Console.WriteLine("Enter surname:");
-            	surName = Console.ReadLine();
-            	return true;
+			//sets the name of the person using this account
+            Console.WriteLine("Enter forename:");
+            foreName = Console.ReadLine();
+            Console.WriteLine("Enter surname:");
+            surName = Console.ReadLine();
+            return true;
         }
-	public bool SetForename(string newForename)
-	{
-		foreName = newForename;
-		return true;
-	}
-	public bool SetSurname(string newSurname)
-	{
-		surName = newSurname;
-		return true;
-	}
-	public string GetSurname()
-	{
-		return surName;
-	}
-        public bool SetNewBalance()
-        {
-		//sets the intial value of the balance of the account
-            	while (balance <= 0)
-            	{
-                	Console.WriteLine("Enter new balance:");
-                	try
-                	{
-                    		balance = Convert.ToDouble(Console.ReadLine());
-                	}
-	                catch (Exception e)
-	                {
-	                    Console.WriteLine(e.Message);
-	                }
-	                if (balance > 0)
-	                {
-	                    return true;
-	                }
-	                else
-	                {
-	                    Console.WriteLine("Balance cannot be less than or equal to 0");
-	                }
-            	}
-            Console.WriteLine("New balance could not be set");
-            return false;
-        }
-	public bool SetBalance(double newBalance)
-	{
-		//sets the balance when editing an existing account
-		balance = newBalance;
-		return true;
-	}
+		public bool SetForename(string newForename)
+		{
+			foreName = newForename;
+			return true;
+		}
+		public bool SetSurname(string newSurname)
+		{
+			surName = newSurname;
+			return true;
+		}
+		public string GetSurname()
+		{
+			return surName;
+		}
+			public bool SetNewBalance()
+			{
+				//sets the initial value of the balance of the account
+				while (balance <= 0)
+				{
+					Console.WriteLine("Enter new balance:");
+					try
+					{
+                    	balance = Convert.ToDouble(Console.ReadLine());
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e.Message);
+					}
+					if (balance > 0)
+					{
+						return true;
+					}
+					else
+					{
+						Console.WriteLine("Balance cannot be less than or equal to 0");
+					}
+				}
+				Console.WriteLine("New balance could not be set");
+				return false;
+			}
+		public bool SetBalance(double newBalance)
+		{
+			//sets the balance when editing an existing account
+			balance = newBalance;
+			return true;
+		}
         public bool SetAddress()
         {
-            Console.WriteLine("Enter new address in the following format, incl. commas: House Street, Town, City (repeat Town where appropriate), Postcode");
-            try
-            {
-                address = Console.ReadLine().Split(", ");
+			try
+			{
+				do
+				{
+                    Console.WriteLine("Enter new address in the following format, incl. commas: House/House number, Street, Town, City (repeat Town where appropriate), Postcode");
+                    address = Console.ReadLine().Split(", ");
+				} while (address.Length != 5);
                 return true;
             }
             catch (Exception e)
@@ -410,5 +487,14 @@ namespace Console_Blank_6
             accountNum = accountNumber;
             return true;
         }
+		public bool SetSortCode()
+		{
+			SortCode = random.Next(0, 999999999);
+			return true;
+		}
+		public int GetSortCode()
+		{
+			return SortCode;
+		}
     }
 }
