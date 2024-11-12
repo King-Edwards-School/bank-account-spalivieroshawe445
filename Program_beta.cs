@@ -9,8 +9,8 @@ namespace Console_Blank_6
         static void Main(string[] args)
         {
             Bank bank;
-            BankAccount account;
             string answer;
+            BankAccount account;
             int intAnswer;
             int intAnswer2;
             double toWithdraw_Deposit;
